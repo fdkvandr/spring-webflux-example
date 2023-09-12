@@ -7,3 +7,6 @@ logging:
   level:
     org.springframework.r2dbc: DEBUG
     org.springframework.data.r2dbc: DEBUG
+server:
+  error:
+    include-stacktrace: on_param
