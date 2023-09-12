@@ -6,7 +6,6 @@ import org.springframework.boot.web.error.ErrorAttributeOptions;
 import org.springframework.boot.web.reactive.error.ErrorAttributes;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.Order;
-import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -15,6 +14,9 @@ import reactor.core.publisher.Mono;
 
 import java.util.Map;
 import java.util.Optional;
+
+import static org.springframework.boot.web.error.ErrorAttributeOptions.*;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 @Order(-2)
 @Component
@@ -35,11 +37,15 @@ public class GlobalExceptionHandler extends AbstractErrorWebExceptionHandler {
     }
 
     private Mono<ServerResponse> formatErrorResponse(ServerRequest serverRequest) {
-        Map<String, Object> errorAttributes = getErrorAttributes(serverRequest, ErrorAttributeOptions.of(ErrorAttributeOptions.Include.STACK_TRACE));
+        boolean traceParam = serverRequest.queryParam("trace")
+                .map(Boolean::parseBoolean)
+                .orElse(false);
+        ErrorAttributeOptions errorAttributeOptions = traceParam? of(Include.STACK_TRACE) : defaults();
+
+        Map<String, Object> errorAttributes = getErrorAttributes(serverRequest, errorAttributeOptions);
         int status = (int) Optional.ofNullable(errorAttributes.get("status")).orElse(500);
-        return ServerResponse
-                .status(status)
-                .contentType(MediaType.APPLICATION_JSON)
+        return ServerResponse.status(status)
+                .contentType(APPLICATION_JSON)
                 .body(BodyInserters.fromValue(errorAttributes));
     }
 }
