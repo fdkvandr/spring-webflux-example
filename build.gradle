@@ -30,4 +30,9 @@ dependencies {
 
 test {
 	useJUnitPlatform()
+	if (JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_13)) {
+		jvmArgs += [
+				"-XX:+AllowRedefinitionToAddDeleteMethods"
+		]
+	}
 }
