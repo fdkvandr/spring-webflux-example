@@ -36,11 +36,11 @@ public class AnimeService {
 
     @Transactional
     public Flux<Anime> batchSave(List<Anime> animes) {
-        return animeRepository.saveAll(animes)
+        return Flux.fromIterable(animes)
                 .doOnNext(it -> {
                     if (StringUtil.isNullOrEmpty(it.getName()))
-                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid name");
-                });
+                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid name");})
+                .flatMap(animeRepository::save);
     }
 
     public Mono<Void> update(Anime anime) {
