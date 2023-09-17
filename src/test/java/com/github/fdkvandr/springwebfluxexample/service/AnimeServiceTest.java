@@ -18,6 +18,7 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 import reactor.test.StepVerifier;
 
+import java.util.List;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 
@@ -103,6 +104,25 @@ class AnimeServiceTest {
                 .expectSubscription()
                 .expectNext(validAnime)
                 .verifyComplete();
+    }
+
+    @Test
+    @DisplayName("batchSave creates list of anime when successful")
+    void batchSave_CreatesListOfAnimeAnime_WhenSuccessful() {
+        StepVerifier.create(animeService.batchSave(List.of(anime, anime)))
+                .expectSubscription()
+                .expectNext(validAnime, validAnime)
+                .verifyComplete();
+    }
+
+    @Test
+    @DisplayName("batchSave returns Mono error when one of the animes in the list contains empty or null name")
+    void batchSave_ReturnsMonoError_WhenContainsInvalidName() {
+        StepVerifier.create(animeService.batchSave(List.of(anime, anime.withName(""))))
+                .expectSubscription()
+                .expectNext(validAnime)
+                .expectError(ResponseStatusException.class)
+                .verify();
     }
 
     @Test
