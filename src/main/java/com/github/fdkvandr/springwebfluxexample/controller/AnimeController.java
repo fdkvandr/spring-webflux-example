@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+
 @Slf4j
 @RestController
 @RequestMapping("/animes")
@@ -34,6 +36,12 @@ public class AnimeController {
     @ResponseStatus(HttpStatus.CREATED)
     public Mono<Anime> save(@Valid @RequestBody Anime anime) {
         return animeService.save(anime);
+    }
+
+    @PostMapping("/batch")
+    @ResponseStatus(HttpStatus.CREATED)
+    public Flux<Anime> batchSave(@RequestBody List<Anime> animes) {
+        return animeService.batchSave(animes);
     }
 
     @PutMapping("/{id}")
