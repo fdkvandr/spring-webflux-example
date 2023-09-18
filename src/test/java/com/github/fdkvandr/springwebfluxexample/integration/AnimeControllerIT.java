@@ -1,21 +1,16 @@
 package com.github.fdkvandr.springwebfluxexample.integration;
 
 import com.github.fdkvandr.springwebfluxexample.domain.Anime;
-import com.github.fdkvandr.springwebfluxexample.exception.CustomAttributes;
 import com.github.fdkvandr.springwebfluxexample.repository.AnimeRepository;
-import com.github.fdkvandr.springwebfluxexample.service.AnimeService;
 import com.github.fdkvandr.springwebfluxexample.util.AnimeCreator;
 import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
 import org.mockito.BDDMockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.BodyInserters;
 import reactor.blockhound.BlockHound;
@@ -24,13 +19,12 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 
-@ExtendWith(SpringExtension.class)
-@WebFluxTest
-@Import({AnimeService.class, CustomAttributes.class})
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class AnimeControllerIT {
 
     @MockBean
@@ -150,6 +144,34 @@ public class AnimeControllerIT {
                 .expectBody().jsonPath("$.status").isEqualTo(HttpStatus.BAD_REQUEST.value())
                              .jsonPath("$.error").isEqualTo(HttpStatus.BAD_REQUEST.getReasonPhrase());
 
+    }
+
+    @Test
+    @DisplayName("batchSave creates list of anime when successful")
+    void batchSave_CreatesListOfAnimeAnime_WhenSuccessful() {
+        testClient.post()
+                .uri("/animes/batch")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(BodyInserters.fromValue(List.of(anime, anime)))
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBodyList(Anime.class)
+                .hasSize(2)
+                .contains(validAnime, validAnime);
+    }
+
+    @Test
+    @Disabled
+    @DisplayName("batchSave returns Mono error when one of the animes in the list contains empty or null name")
+    void batchSave_ReturnsMonoError_WhenContainsInvalidName() {
+        testClient.post()
+                .uri("/animes/batch")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(BodyInserters.fromValue(List.of(anime, anime.withName(""))))
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody().jsonPath("$.status").isEqualTo(HttpStatus.BAD_REQUEST.value())
+                             .jsonPath("$.error").isEqualTo(HttpStatus.BAD_REQUEST.getReasonPhrase());
     }
 
     @Test
