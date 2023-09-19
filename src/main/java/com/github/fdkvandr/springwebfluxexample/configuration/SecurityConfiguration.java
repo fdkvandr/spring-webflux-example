@@ -18,16 +18,18 @@ import org.springframework.security.web.server.SecurityWebFilterChain;
 public class SecurityConfiguration {
 
     @Bean
-    public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
-        return http
-                .csrf(ServerHttpSecurity.CsrfSpec::disable)
-                .authorizeExchange(authorizeExchangeSpec -> authorizeExchangeSpec
-                        .pathMatchers(HttpMethod.POST, "/animes/**").hasRole("ADMIN")
-                        .pathMatchers(HttpMethod.GET, "/animes/**").hasRole("USER")
-                        .anyExchange().authenticated())
-                .formLogin(Customizer.withDefaults())
-                .httpBasic(Customizer.withDefaults())
-                .build();
+        public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
+            return http
+                    .csrf(ServerHttpSecurity.CsrfSpec::disable)
+                    .authorizeExchange(authorizeExchangeSpec -> authorizeExchangeSpec
+                            .pathMatchers(HttpMethod.POST, "/animes/**").hasRole("ADMIN")
+                            .pathMatchers(HttpMethod.PUT, "/animes/**").hasRole("ADMIN")
+                            .pathMatchers(HttpMethod.DELETE, "/animes/**").hasRole("ADMIN")
+                            .pathMatchers(HttpMethod.GET, "/animes/**").hasRole("USER")
+                            .anyExchange().authenticated())
+                    .formLogin(Customizer.withDefaults())
+                    .httpBasic(Customizer.withDefaults())
+                    .build();
     }
 
     @Bean
