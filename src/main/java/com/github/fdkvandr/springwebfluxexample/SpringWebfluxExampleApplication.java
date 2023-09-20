@@ -8,7 +8,12 @@ import reactor.blockhound.BlockHound;
 public class SpringWebfluxExampleApplication {
 
 	static {
-		BlockHound.install();
+		BlockHound.install(
+				builder -> builder
+						.allowBlockingCallsInside("java.io.InputStream", "readNBytes")
+						.allowBlockingCallsInside("java.io.FilterInputStream", "read")
+						.allowBlockingCallsInside("java.lang.reflect.Method", "invoke")
+		);
 	}
 
 	public static void main(String[] args) {

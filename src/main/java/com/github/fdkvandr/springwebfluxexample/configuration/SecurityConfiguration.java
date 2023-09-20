@@ -26,6 +26,7 @@ public class SecurityConfiguration {
                             .pathMatchers(HttpMethod.PUT, "/animes/**").hasRole("ADMIN")
                             .pathMatchers(HttpMethod.DELETE, "/animes/**").hasRole("ADMIN")
                             .pathMatchers(HttpMethod.GET, "/animes/**").hasRole("USER")
+                            .pathMatchers(HttpMethod.GET, "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", "/webjars/**").permitAll()
                             .anyExchange().authenticated())
                     .formLogin(Customizer.withDefaults())
                     .httpBasic(Customizer.withDefaults())
